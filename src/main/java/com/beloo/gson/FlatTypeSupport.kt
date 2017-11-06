@@ -1,4 +1,4 @@
-package com.beloo.util
+package com.beloo.gson
 
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
@@ -6,7 +6,7 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import java.io.IOException
 
-/** mark a field as a flat field to be insterted in container object.
+/** mark a field as a flat field to be inserted in container object.
  * fields of nested objects will be serialized as fields of main object with using prefix for field name if provided
  * @param prefix prefix for corresponding field name in target object. You need it for example if object contains several same nested objects */
 @Target(AnnotationTarget.FIELD)

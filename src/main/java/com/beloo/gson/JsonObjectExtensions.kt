@@ -1,4 +1,4 @@
-package com.beloo.util
+package com.beloo.gson
 
 import com.google.gson.JsonObject
 
