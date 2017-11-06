@@ -22,58 +22,74 @@ class FlatGsonAnnotationIntegrationTest {
 
     @Test
     fun toJson_WithSeveralFieldsAndFlatPrefixAnnotation_NestedFieldsSerialized() {
-        val model = TestModelPrefix("test", Nested("one"), Nested("two"))
+        val model = ContainsNestedPrefix("test", Nested("one", "two"), Nested("three", "four"))
         val json: String = gson.toJson(model)
-        val result = gson.fromJson<ResultModelPrefix>(json, ResultModelPrefix::class.java)
+        val result = gson.fromJson<FlatObjectPrefix>(json, FlatObjectPrefix::class.java)
         assertEquals("test", result.test)
-        assertEquals("one", result.nested)
-        assertEquals("two", result.nestedSecond)
+        assertEquals("one", result.firstField1)
+        assertEquals("two", result.firstField2)
+        assertEquals("three", result.secondField1)
+        assertEquals("four", result.secondField2)
     }
 
     @Test
     fun toJson_WithOneFieldAndFlatAnnotation_NestedFieldSerialized() {
-        val model = TestModel("test", Nested("one"))
+        val model = ContainsNested("test", Nested("one", "two"))
         val json: String = gson.toJson(model)
-        val result = gson.fromJson<ResultModel>(json, ResultModel::class.java)
+        val result = gson.fromJson<FlatObject>(json, FlatObject::class.java)
         assertEquals("test", result.test)
-        assertEquals("one", result.nested)
+        assertEquals("one", result.field1)
+        assertEquals("two", result.field2)
+    }
+
+    @Test
+    fun fromJson_ToObjectWithOneNestedFlatObject_NestedObjectDeserialized() {
+
     }
 
 }
 
-data class ResultModelPrefix(
+data class FlatObjectPrefix(
         @SerializedName("test")
         val test: String,
-        @SerializedName("first_nested")
-        val nested: String,
-        @SerializedName("second_nested")
-        val nestedSecond: String
+        @SerializedName("first_field1")
+        val firstField1: String,
+        @SerializedName("first_field2")
+        val firstField2: String,
+        @SerializedName("second_field1")
+        val secondField1: String,
+        @SerializedName("second_field2")
+        val secondField2: String
 )
 
-data class TestModelPrefix(
+data class ContainsNestedPrefix(
         @SerializedName("test")
         val test: String,
         @Flat(prefix = "first_")
-        val nested: Nested,
+        val nested1: Nested,
         @Flat(prefix = "second_")
-        val nestedSecond: Nested
+        val nested2: Nested
 )
 
-data class TestModel(
+data class ContainsNested(
         @SerializedName("test")
         val test: String,
         @Flat
-        val nested: Nested
+        val nested1: Nested
 )
 
-data class ResultModel(
+data class FlatObject(
         @SerializedName("test")
         val test: String,
-        @SerializedName("nested")
-        val nested: String
+        @SerializedName("field1")
+        val field1: String,
+        @SerializedName("field2")
+        val field2: String
 )
 
 data class Nested(
-        @SerializedName("nested")
-        val nested: String
+        @SerializedName("field1")
+        val field1: String,
+        @SerializedName("field2")
+        val field2: String
 )
