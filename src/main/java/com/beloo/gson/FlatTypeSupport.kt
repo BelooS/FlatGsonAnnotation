@@ -1,6 +1,7 @@
 package com.beloo.gson
 
 import com.google.gson.*
+import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
@@ -23,27 +24,40 @@ class FlatTypeAdapterFactory : TypeAdapterFactory {
         val defaultAdapter = gson.getDelegateAdapter(this, type)
         val elementAdapter = gson.getAdapter(JsonElement::class.java)
 
+        val fields = type.rawType.declaredFields
+                .filter { it.isAnnotationPresent(Flat::class.java) }
+                .onEach { it.isAccessible = true }
+
         return object : TypeAdapter<T>() {
             @Throws(IOException::class)
             override fun write(out: JsonWriter, value: T) {
                 val element: JsonElement = defaultAdapter.toJsonTree(value)
                 if (element.isJsonObject) {
-                    type.rawType.declaredFields
-                            .filter { it.isAnnotationPresent(Flat::class.java) }
-                            .forEach {
-                                it.isAccessible = true
-                                val fieldValue = it.get(value)
-                                val prefix: String = it.getAnnotation(Flat::class.java).prefix
-                                val adapter = gson.getAdapter(fieldValue.javaClass)
-                                val nestedObject = adapter.toJsonTree(fieldValue).asJsonObject
-                                element.asJsonObject.addPropertiesFrom(nestedObject, prefix)
-                            }
+                    fields.forEach {
+                        val prefix: String = it.getAnnotation(Flat::class.java).prefix
+                        val fieldValue = it.get(value)
+                        val adapter = gson.getAdapter(fieldValue.javaClass)
+                        val nestedObject = adapter.toJsonTree(fieldValue).asJsonObject
+                        element.asJsonObject.addPropertiesFrom(nestedObject, prefix)
+                    }
                 }
                 elementAdapter.write(out, element)
             }
 
             @Throws(IOException::class)
-            override fun read(source: JsonReader): T = defaultAdapter.read(source)
+            override fun read(source: JsonReader): T {
+                val value: T = defaultAdapter.read(source)
+                fields.forEach {
+                    //todo check if it is regular object
+                    it.type.declaredFields.forEach {
+                        val fieldName = it.getAnnotation(SerializedName::class.java)?.value ?: it.name
+                        
+                    }
+
+                    val prefix: String = it.getAnnotation(Flat::class.java).prefix
+                }
+                return value
+            }
         }.nullSafe()
     }
 }
