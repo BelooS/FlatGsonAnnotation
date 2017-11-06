@@ -43,8 +43,28 @@ class FlatGsonAnnotationIntegrationTest {
     }
 
     @Test
-    fun fromJson_ToObjectWithOneNestedFlatObject_NestedObjectDeserialized() {
+    fun fromJson_ToObjectWithOneNestedObject_NestedObjectDeserialized() {
+        val flatObject = FlatObject("test", "one", "two")
+        val json: String = gson.toJson(flatObject)
+        val result = gson.fromJson<ContainsNested>(json, ContainsNested::class.java)
+        assertNotNull(result.nested1)
+        assertEquals("test", result.test)
+        assertEquals("one", result.nested1.field1)
+        assertEquals("two", result.nested1.field2)
+    }
 
+    @Test
+    fun fromJson_ToObjectWithSeveralNestedObjects_NestedObjectsDeserialized() {
+        val flatObject = FlatObjectPrefix("test", "one", "two", "three", "four")
+        val json: String = gson.toJson(flatObject)
+        val result = gson.fromJson<ContainsNestedPrefix>(json, ContainsNestedPrefix::class.java)
+        assertNotNull(result.nested1)
+        assertNotNull(result.nested2)
+        assertEquals("test", result.test)
+        assertEquals("one", result.nested1.field1)
+        assertEquals("two", result.nested1.field2)
+        assertEquals("three", result.nested2.field1)
+        assertEquals("four", result.nested2.field2)
     }
 
 }
