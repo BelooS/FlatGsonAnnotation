@@ -16,6 +16,7 @@ class FlatGsonAnnotationIntegrationTest {
     fun setUp() {
         gson = GsonBuilder()
                 .addSerializationExclusionStrategy(FlatExclusionStrategy())
+                .addDeserializationExclusionStrategy(FlatExclusionStrategy())
                 .registerTypeAdapterFactory (FlatTypeAdapterFactory())
                 .create()
     }
