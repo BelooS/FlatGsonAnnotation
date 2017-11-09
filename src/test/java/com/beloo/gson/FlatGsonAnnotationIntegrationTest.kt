@@ -44,8 +44,19 @@ class FlatGsonAnnotationIntegrationTest {
     }
 
     @Test
+    fun toJson_ChildOfObjectWithNested_NestedFieldSerialized() {
+        val model = Child("test", Nested("one", "two"), 5)
+        val json: String = gson.toJson(model)
+        val result = gson.fromJson<FlatObject>(json, FlatObject::class.java)
+        assertEquals("test", result.test)
+        assertEquals("one", result.field1)
+        assertEquals("two", result.field2)
+        assertEquals(5, result.value)
+    }
+
+    @Test
     fun fromJson_ToObjectWithOneNestedObject_NestedObjectDeserialized() {
-        val flatObject = FlatObject("test", "one", "two")
+        val flatObject = FlatObject("test", "one", "two", 5)
         val json: String = gson.toJson(flatObject)
         val result = gson.fromJson<ContainsNested>(json, ContainsNested::class.java)
         assertNotNull(result.nested1)
@@ -92,7 +103,13 @@ data class ContainsNestedPrefix(
         val nested2: Nested
 )
 
-data class ContainsNested(
+class Child(
+        test: String,
+        nested1: Nested,
+        @SerializedName("value")
+        val value: Int) : ContainsNested(test, nested1)
+
+open class ContainsNested(
         @SerializedName("test")
         val test: String,
         @Flat
@@ -105,7 +122,9 @@ data class FlatObject(
         @SerializedName("field1")
         val field1: String,
         @SerializedName("field2")
-        val field2: String
+        val field2: String,
+        @SerializedName("value")
+        val value: Int
 )
 
 data class Nested(

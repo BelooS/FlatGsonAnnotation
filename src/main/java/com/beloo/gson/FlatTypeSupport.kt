@@ -24,7 +24,8 @@ class FlatTypeAdapterFactory : TypeAdapterFactory {
         val defaultAdapter = gson.getDelegateAdapter(this, type)
         val elementAdapter = gson.getAdapter(JsonElement::class.java)
 
-        val fields = type.rawType.declaredFields
+        val fields = type.rawType.getAllFields()
+                .asSequence()
                 .filter { it.isAnnotationPresent(Flat::class.java) }
                 .onEach { it.isAccessible = true }
 
@@ -51,7 +52,7 @@ class FlatTypeAdapterFactory : TypeAdapterFactory {
                     //todo check if it is regular object
                     it.type.declaredFields.forEach {
                         val fieldName = it.getAnnotation(SerializedName::class.java)?.value ?: it.name
-                        
+
                     }
 
                     val prefix: String = it.getAnnotation(Flat::class.java).prefix
